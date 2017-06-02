@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+  <bgsound src="./music/bgm.mp3" loop="-1" autostart="true">
+   <style type="text/css">
+     body{
+      background-color: rgb(0, 128, 128);
+    }
+    #all{
+     position: relative;
+     width: 1200px;
+     height: 600px;
+
+
+
+   }
+   #boss{
+     position: absolute;
+     left: 1016px;
+     top:305px;
+   }
+   #plant{
+     position: absolute;
+     left: 251px;
+     top:380px;
+   }
+
+   #main{
+
+     background-image: url(./images/background1.jpg);
+     height: 100%;
+
+
+   }
+   #tu1{
+     position: absolute;
+     left: 471px;
+     top: 37px;
+   }
+   #jixu{
+    display: none;
+  }
+
+  #stop{
+   display: none;
+ }
+
+</style>
+</head>
+<body>
+  <div id="all"><div id="main"><button id='stop' onclick="stop()">1</button><button id="jixu">2</button>
+    <img src="./images/plant1.gif" id="plant" onclick="createbullet()" ></div></div>
+    <!-- plant1.gif是植物图片，createbullet是创造子弹函数 -->
+  </body>
+  <script type="text/javascript">
+   var zdm=0;     //子弹发射位置累加值;
+   var bosswalk=0;        //僵尸行走的自调用函数；
+   var bulletfly=0;      //子弹的自调用函数;
+   var hited=0;   //打中次数;
+   var mboss=0;  //创造僵尸的自调用函数
+   var flag=true;  //决定植物是否能攻击的标识
+   function createboss(){  //创造僵尸
+     var bossm=1000;        //僵尸距离左侧的初始位置累加值;
+             //僵尸血量
+   	document.getElementById('main').style.display='block';   //从外部画面切换为内部画面 内画面显示状态打开
+   	  var main=document.getElementById('main');    //内部
+      var stop=document.getElementById('stop');    //暂停键
+   	 boss=document.createElement('img');           //创建僵尸的图片元素
+     //设置僵尸图片属性
+     boss.src='./img/js1.gif';                 
+     boss.style.position = 'absolute';
+     boss.style.left='1016px';
+     boss.style.top='305px';
+     boss.name='zombie';
+     boss.setAttribute('boss_hp', 40); //设置每创造出一只僵尸，它的血量值为40
+      main.insertBefore(boss,stop);  //把僵尸图片插入到暂停键的前面
+
+   	  bosswalk=walk(bossm,boss);       //调用僵尸行走函数，把僵尸距离左侧的初始位置累加值 以及当前僵尸图片的参数引入
+
+      mboss= setTimeout(createboss,8000);  //当前 创建僵尸的函数自调用，每8秒自调用一次
+      
+
+    }
+	function walk(bossm,boss){        //僵尸行走
+    var zombies = document.getElementsByName('zombie');
+    var main=document.getElementById('main');
+      //获取第一个僵尸
+      var zombie = zombies[0];
+      var x=zombie.offsetLeft; //获取第一个僵尸距离左侧的距离
+		if(x>230){          //如果僵尸距离左侧的值大于230
+      if(hited>4&&hited<8&&boss==zombie){
+        bossm-=2; 
+      }
+      else {
+
+
+		bossm-=5;    }          //每次累加值自减5
+
+      boss.style.left =bossm+'px';      //位置累加值追加到图片距离左侧的属性上
+      bosswalk=setTimeout(walk,300,bossm,boss); //设置僵尸行走函数的调用间隔时间来控制僵尸速度，  并将bossm，boss传入下一次的函数执行
+
+    } 
+      else{                               //僵尸到达尽头，植物消失，出现死亡提示图片,清空僵尸行走和创造僵尸函数；
+      	clearTimeout(bosswalk);                
+        clearTimeout(mboss);
+        document.getElementById('plant').style.display = 'none';
+        var aimg=document.createElement('img');
+        aimg.src='./images/over.png';
+        aimg.style.position = 'absolute';
+        aimg.style.top='100px';
+        aimg.style.left = '200px';
+        document.getElementById('main');
+        main.appendChild(aimg);
+      }
+    }
+	function createbullet(){       //创建子弹函数
+    if(flag){ 
+     var zombies = document.getElementsByName('zombie');
+     var main=document.getElementById('main');
+      //获取第一个僵尸
+      var zombie = zombies[0];
+      //获取血量
+      var boss_hp = parseInt(zombie.getAttribute('boss_hp'));
+      if(hited<3){
+        zombie.setAttribute('boss_hp', --boss_hp);  //当hited（点击植物次数）小于3时，子弹每发射一次，僵尸血量减1；
+        setInterval(cd,2000);
+      }
+
+		var zdm=280;             //子弹初始位置 距离左侧的距离
+		var main=document.getElementById('main');    //获取内画面的ID
+
+        var img=document.createElement('img');  //创建一个子弹的图片元素
+        img.style.position = 'absolute';
+        img.style.left = '300px';
+        img.style.top='378px';
+        img.name='bullet';
+        img.setAttribute("src", "./images/hit1.gif");
+        	var pimg=document.getElementById('plant');     //获取植物的ID值
+
+          if(hited>3){   
+    //当打中次数大于3次，更换植物图片和子弹图片  伤害值增加，攻速加快
+    setInterval(cd,800);  
+    pimg.src="./img/plant2.gif";
+    img.src="./img/zd2.gif";
+    zombie.setAttribute('boss_hp', boss_hp-=3);
+  }
+  if(hited>6){
+    pimg.src="./images/plant2.gif";
+    img.src="./img/zd3.gif";
+    zombie.setAttribute('boss_hp', boss_hp-=6);
+    setInterval(cd,100);
+  }
+
+
+		main.appendChild(img);        //把图片插入到最后 内画面main中
+		 hits(zdm,img);       //调用发射子弹函数;
+
+    hited++;                
+
+		 setTimeout(hp,600,zombie,boss_hp);        // 执行一次hp判断语句
+		}
+    flag=false;
+  }
+	//发射子弹
+	function hits(zdm,img){    //使子弹动起来
+   var bullets=document.getElementsByName('bullet');  //获取子弹元素
+   var bullet=img.offsetLeft;  //获取当前子弹距离左侧的距离值
+         var bossimg=document.getElementById('main').firstChild.offsetLeft;    //获取僵尸距离左侧的距离
+     var a=bossimg-bullet;    // 两者的差值  
+
+     if(a>0){    //如果 大于0就继续执行
+               zdm+=5;                //子弹距离左侧累加值  自加5
+               img.style.left = zdm+'px';
+             bulletfly=setTimeout(hits,10,zdm,img);    //发射子弹自调用
+           }
+            else{                                      //当子弹与僵尸距离小于0时，子弹图片消失;
+              var a=document.getElementById('main');   //获取页面的DIV
+              a.removeChild(bullets[0]);   //移除所有发射子弹的第一发子弹
+            }
+          }
+
+   function hp(zombie,boss_hp){            //判断HP数值，来切换僵尸状态图片;
+     if(boss_hp<10){
+       zombie.src='./img/js2.gif';
+
+     }
+     if(boss_hp<1){
+       zombie.src='./img/js3.gif';
+       setTimeout(ded,1200,zombie,boss_hp);
+     }
+   }
+   function cd(){  //通过setInterval来规定发射子弹的间隔时间，用flag修饰符来规定能否执行制造子弹函数
+    flag=true;
+  }
+   function ded(zombie,boss_hp){        //当僵尸死亡时，删除僵尸图片元素
+
+     var main=document.getElementById('main'); 
+     main.removeChild(zombie); 
+
+   }
+   createboss();  //打开页面，调用僵尸创造函数
+ </script>
+ </html>

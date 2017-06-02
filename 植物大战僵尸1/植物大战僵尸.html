@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+  <bgsound src="./music/bgm.mp3" loop="-1" autostart="true">
+   <style type="text/css">
+     body{
+      background-color: rgb(0, 128, 128);
+    }
+    #all{
+     position: relative;
+     width: 1200px;
+     height: 600px;
+
+
+
+   }
+   #boss{
+     position: absolute;
+     left: 1016px;
+     top:305px;
+   }
+   #plant{
+     position: absolute;
+     left: 251px;
+     top:380px;
+   }
+   #start{
+     background-image: url(./images/startbg.png);
+     height: 600px;
+     background-repeat: no-repeat;
+
+
+   }
+   #main{
+     display: none;
+     background-image: url(./images/background1.jpg);
+     height: 100%;
+
+
+   }
+   #tu1{
+     position: absolute;
+     left: 471px;
+     top: 37px;
+   }
+  #jixu{
+    display: none;
+  }
+  #dSunNum{
+    left: 225px;
+    top: 0px;
+  }
+
+</style>
+</head>
+<body>
+  <!-- <embed src="./music/bgm.mp3" autostart="true"   loop="true" hidden="true" /> -->
+  <div id="all"><div id="start"><img src="./images/start4.png" onclick="createboss()" id="tu1"></div><div id="main"><button id='stop' onclick="stop()">暂停</button><button id="jixu">2</button><div id="dSunNum" style="background:url('images/SunBack.png') no-repeat;position:absolute;width:123px;height:35px"><span id="sSunNum" style="text-align:center;position:absolute;top:4px;left:43px;width:68px;font-family:Verdana;font-weight:bold;font-size:18pt"></span></div>
+<img src="./images/plant1.gif" id="plant" onclick="createbullet()" ></div></div>
+</body>
+<script type="text/javascript">
+   var bulletm=0;     //子弹发射位置累加值;
+   var bosswalk=0;        //僵尸行走的自调用函数；
+   var bulletfly=0;      //子弹的自调用函数;
+   var hited=0;   //打中次数;
+   var mboss=0;  //创造僵尸的自调用函数
+   var flag=true;  //决定植物是否能攻击的标识
+   var suntimes=0;  //太阳生成的自调用函数
+   var sunup=0;   //太阳上升的时间量
+   var sunhit=0;   //打下的太阳次数
+   var ready=false; //sun make 
+   var mbossarr=[];
+   var bosswalkarr=[];
+   var i=0;
+   var t=0;
+   function createboss(){  //创造僵尸
+     var bossm=1000;        //僵尸距离左侧的初始位置累加值;
+             //僵尸血量
+   	document.getElementById('main').style.display='block';   //从外部画面切换为内部画面 内画面显示状态打开
+    document.getElementById('start').style.display='none';
+    document.getElementById('tu1').src='./images/start3.png';
+   	  var main=document.getElementById('main');    //内部
+      var stop=document.getElementById('stop');    //暂停键
+   	 boss=document.createElement('img');           //创建僵尸的图片元素
+     //设置僵尸图片属性
+     boss.src='./images/Zombie.gif';             
+     boss.style.position = 'absolute';
+     boss.style.left='1016px';
+     boss.style.top='305px';
+     boss.name='zombie';
+     boss.setAttribute('boss_hp', 40);
+      main.insertBefore(boss,stop);  //把僵尸图片插入到暂停键的前面
+
+   	  bosswalk=walk(bossm,boss);       //调用僵尸行走函数，把僵尸距离左侧的初始位置累加值 以及当前僵尸图片的参数引入
+    
+      mboss= setTimeout(createboss,5000);  //当前 创建僵尸的函数自调用，每10秒自调用一次
+        mbossarr[i]=mboss;
+        i++;
+    
+      ready=true;
+    }
+	function walk(bossm,boss){        //僵尸行走
+    var zombies = document.getElementsByName('zombie');
+    var main=document.getElementById('main');
+      //获取第一个僵尸
+      var zombie = zombies[0];
+      var x=zombie.offsetLeft; //获取第一个僵尸距离左侧的距离
+		if(x>230){          //如果僵尸距离左侧的值大于230
+      if(hited>4&&hited<8&&boss==zombie){
+          bossm-=2; 
+      }
+      else {
+        
+      
+		bossm-=5;    }          //每次累加值自减5
+
+      boss.style.left =bossm+'px';      //位置累加值追加到图片距离左侧的属性上
+      bosswalk=setTimeout(walk,100,bossm,boss);
+      bosswalkarr[t]=bosswalk;
+      t++;
+    } 
+      else{                               //僵尸到达尽头，植物消失，出现死亡提示图片,清空僵尸行走和创造僵尸函数；
+      	clearTimeout(bosswalk);                
+        clearTimeout(mboss);
+        clearInterval(suntimes);
+        clearInterval(times);
+        document.getElementById('plant').style.display = 'none';
+        var aimg=document.createElement('img');
+        aimg.src='./images/over.png';
+        aimg.style.position = 'absolute';
+        aimg.style.top='100px';
+        aimg.style.left = '200px';
+        document.getElementById('main');
+        main.appendChild(aimg);
+      }
+    }
+	function createbullet(){       //创建子弹
+    if(flag){ 
+     var zombies = document.getElementsByName('zombie');
+     var main=document.getElementById('main');
+      //获取第一个僵尸
+      var zombie = zombies[0];
+      //获取血量
+      var boss_hp = parseInt(zombie.getAttribute('boss_hp'));
+      //控制台输出
+      // console.log("boss_hp:" + boss_hp);
+      //血量减1
+      // console.log("hited:" + hited);
+      if(hited<3){
+        zombie.setAttribute('boss_hp', --boss_hp);
+        setInterval(cd,2000);
+      }
+
+		var bulletm=280;             //子弹初始位置 距离左侧的距离
+		var main=document.getElementById('main');    //获取内画面的ID
+
+        var img=document.createElement('img');  //创建一个子弹的图片元素
+        img.style.position = 'absolute';
+        img.style.left = '300px';
+        img.style.top='378px';
+        img.name='bullet';
+        img.setAttribute("src", "./images/hit1.gif");
+        	var pimg=document.getElementById('plant');     //获取植物的ID值
+
+          if(hited>3){   
+    //当打中次数大于3次，更换植物图片和子弹图片  伤害值增加，攻速加快
+    setInterval(cd,800);  
+    pimg.src="./images/plant2.gif";
+    img.src="./images/hit2.gif";
+    zombie.setAttribute('boss_hp', boss_hp-=3);
+  }
+  if(hited>6){
+    pimg.src="./images/plant3.gif";
+    img.src="./images/hit3.gif";
+    zombie.setAttribute('boss_hp', boss_hp-=6);
+    setInterval(cd,100);
+  }
+
+
+		main.appendChild(img);        //把图片插入到最后 内画面main中
+		 hits(bulletm,img);       //调用发射子弹函数;
+
+     hited++;                
+
+		 setTimeout(hp,600,zombie,boss_hp);        // 执行一次hp判断语句
+		}
+    flag=false;
+  }
+	//发射子弹
+	function hits(bulletm,img){ 
+         var bullets=document.getElementsByName('bullet');
+         var bullet=img.offsetLeft;
+         var bossimg=document.getElementById('main').firstChild.offsetLeft;    //获取僵尸距离左侧的距离
+     var a=bossimg-bullet;    // 两者的差值
+
+     if(a>0){
+               bulletm+=5;                //子弹距离左侧累加值  自加5
+               img.style.left = bulletm+'px';
+             bulletfly=setTimeout(hits,10,bulletm,img);    //发射子弹自调用
+           }
+            else{                                      //当子弹与僵尸距离小于0时，子弹图片消失;
+              var a=document.getElementById('main');
+              a.removeChild(bullets[0]);  
+            }
+          }
+
+   function hp(zombie,boss_hp){            //判断HP数值，来切换僵尸状态图片;
+     if(boss_hp<10){
+       zombie.src='./images/Zombie2.gif';
+
+     }
+     if(boss_hp<1){
+       zombie.src='./images/Zombie4.gif';
+       setTimeout(ded,1200,zombie,boss_hp);
+     }
+   }
+   function cd(){  //通过setInterval来规定发射子弹的间隔时间，用flag修饰符来规定能否执行制造子弹函数
+    flag=true;
+  }
+   function ded(zombie,boss_hp){        //当僵尸死亡时，删除僵尸图片元素
+
+     var main=document.getElementById('main'); 
+     main.removeChild(zombie); 
+
+   }
+   function sun(){         //生成太阳
+    if(ready){
+    var main=document.getElementById('main');
+    var sun=document.createElement('img');
+    var width=Math.round(Math.random()*600);
+    var height = Math.round(Math.random()*300);
+    var sunwalkup=0;
+    var sunwalkleft=0;
+    sun.src='./images/sun.gif';
+    sun.style.width='66px';
+    sun.style.height = '65px';
+    sun.style.position='absolute';
+    var sun_left=sun.style.left = width+'px';
+    var sun_top=sun.style.top=height+'px';
+    sun.name='sun';
+    main.appendChild(sun);
+    time();
+    sun.onclick=function(){
+      sunmove(width,height,sunwalkup,sunwalkleft,sun,event);
+    };
+    
+    
+   }
+ }
+   function time(){        //记录太阳生成的时间数 函数
+    var suns=document.getElementsByName('sun');      //获取所有的太阳图片
+     if(sunup>4){main.removeChild(suns[0]);sunup=0;}  //如果sundown大于2，则清除第一个太阳
+     sunup++;      //记录太阳生成的时间数
+   }
+   function sunmove(width,height,sunwalkup,sunwalkleft,sun,event){   //阳光的移动
+    var main=document.getElementById('main');
+    if(sun.offsetTop>0){                        //如果当与顶部为0时阳光消失
+      if(width<250){                             //在记分框左边出现的阳光向右飞向记分框，反之同理。
+       sunwalkleft+=10;
+      }
+      else {
+         sunwalkleft-=10;
+      }
+     sunwalkup-=10;
+      sun.style.left =width+sunwalkleft+'px';
+      sun.style.top =height+sunwalkup+'px';}
+    else{
+      if(sun.offsetLeft>300){
+      sunwalkleft-=10;
+      sun.style.left =width+sunwalkleft+'px';}
+      else if(sun.offsetLeft>0&&sun.offsetLeft<200) {
+         sunwalkleft+=10;
+         sun.style.left =width+sunwalkleft+'px';
+      }
+      else {
+    
+
+    main.removeChild(event.target); //点击太阳，清除所点击的太阳图片。
+      sunhit++;    } 
+    document.getElementById('sSunNum').innerHTML=sunhit;}
+    setTimeout(sunmove,100,width,height,sunwalkup,sunwalkleft,sun,event);
+    
+   }
+
+  function stop(){
+
+    for(var k=0;k<bosswalkarr.length;k++){
+      
+      clearTimeout(bosswalkarr[k]);
+    }
+    for(var t=0;t<mbossarr.length;t++){
+       clearTimeout(mbossarr[t]);
+    }
+  }
+
+   var suntimes=setInterval(sun,5000); //每5秒增加一个太阳；
+   var times=setInterval(time,10000);  //每10秒执行一次记录太阳生成数的函数
+   
+ </script>
+ </html>
